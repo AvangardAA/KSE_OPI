@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import unittest
-from algo import normalize_time, fetch
+from algo import normalize_time
 class TestNormalizeTime(unittest.TestCase):
 
     def test_unknown(self):
