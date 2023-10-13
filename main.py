@@ -1,5 +1,9 @@
-from algo import normalize_time_human_implementation, fetch
+import time
+from datetime import datetime
+import random
 
+from algo import normalize_time_human_implementation, fetch, transform_from_iso_format
+import requests
 def main():
     #print(check_dates_correspond("2025-27-09-20:00", "2025-14-09-20:00"))
     language = input("Choose language for response: english/ukrainian\n")
@@ -18,5 +22,24 @@ def main():
         c += len(users_data['data'])
         users_data = fetch(c)
 
+def new():
+    while True:
+        resbuf = []
+        idbuf = []
+        res = requests.get("http://127.0.0.1:8000/api/stats/users", {"date": transform_from_iso_format(int(datetime.now().timestamp())+10800)})
+        resbuf.append({"usersOnline": res.json()["usersOnline"]})
+        idbuf = res.json()["users"]
+        res = requests.get("http://127.0.0.1:8000/api/stats/user", {"date": transform_from_iso_format(int(datetime.now().timestamp())+10800), "userId": random.choice(idbuf)})
+        resbuf.append(res.text)
+        res = requests.get("http://127.0.0.1:8000/api/predictions/users",
+                           {"date": transform_from_iso_format(int(datetime.now().timestamp()) + 10800)})
+        resbuf.append(res.text)
+        res = requests.get("http://127.0.0.1:8000/api/predictions/user",
+                           {"date": transform_from_iso_format(int(datetime.now().timestamp()) + 10800), "userId": random.choice(idbuf), "tolerance": random.randint(30, 80)})
+        resbuf.append(res.text)
+        for i in resbuf:
+            print(i)
+        time.sleep(30)
+
 if __name__ == "__main__":
-    main()
+    new()
