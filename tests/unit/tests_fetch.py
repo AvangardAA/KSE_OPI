@@ -1,7 +1,9 @@
 import unittest
 from unittest.mock import patch, Mock
 import requests
-from algo import fetch
+
+from functions.funcs import fetch
+
 
 class TestFetchFunction(unittest.TestCase):
     @patch('requests.get')

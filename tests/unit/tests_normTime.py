@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 import unittest
-from algo import normalize_time_human_implementation
-from algo import check_dates_correspond
+
+from functions.funcs import normalize_time_human_implementation
+from functions.utils import check_dates_correspond
 
 
 class TestNormalizeTime(unittest.TestCase):
