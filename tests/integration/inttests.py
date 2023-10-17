@@ -1,30 +1,61 @@
 import unittest
 from unittest.mock import patch
-from functions.funcs import total_time_user, total_time_avg
+from fastapi.testclient import TestClient
+from algo import app
+
 
 class TestIntegration(unittest.TestCase):
-    @patch('functions.funcs.total_time_user')
-    def test_total_time_user_integration(self, mock_total_time_user):
-        mock_total_time_user.return_value = {
-            'total': 2,
-            'data': [
-                {'userId': "908dcb71-beeb-57c4-72f6-50451a6c3d12", 'lastSeenDate': '2023-10-17T12:00:00'},
-                {'userId': "e13412b2-fe46-7149-6593-e47043f39c91", 'lastSeenDate': '2023-10-17T12:00:00'},
-            ]
-        }
-        result = total_time_user(['908dcb71-beeb-57c4-72f6-50451a6c3d12', "e13412b2-fe46-7149-6593-e47043f39c91"])
-        #print(result)
 
-        # assert with value is here but due to realtime behaviour i cant place it because it will fail 5 min after i place it
-        self.assertIsNotNone(result)
+    def setUp(self):
+        self.client = TestClient(app)
 
-    @patch('functions.funcs.total_time_avg')
-    def test_total_time_avg_integration(self, mock_total_avg):
-        mock_total_avg.return_value = {"totalTime": [100, 200, 300]}
-        result = total_time_avg(['908dcb71-beeb-57c4-72f6-50451a6c3d12', "e13412b2-fe46-7149-6593-e47043f39c91"])
+    def test_gdpr_integration(self):
+        with patch('algo.gdprf') as mock_gdprf:
+            mock_gdprf.return_value = {'msg': 'added successfully'}
 
-        # assert with value is here but due to realtime behaviour i cant place it because it will fail 5 min after i place it
-        self.assertIsNotNone(result)
+            response = self.client.post("/api/user/forget?userId=test123")
+            self.assertEqual(response.json(), {'msg': 'added successfully'})
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_get_users_historical_data_integration(self):
+        with patch('algo.hist_data') as mock_hist_data:
+            mock_hist_data.return_value = {'usersOnline': 0, 'users': []}
+
+            response = self.client.get("/api/stats/users?date=2023-10-17")
+
+            self.assertEqual(response.json(), {'usersOnline': 0, 'users': []})
+    def test_get_user_historical_data_integration(self):
+        with patch('algo.user_hist_data') as mock_user_hist_data:
+            mock_user_hist_data.return_value = {'wasUserOnline': False, 'nearestOnlineTime': None}
+            response = self.client.get("/api/stats/user?date=2023-10-17&userId=test123")
+            self.assertEqual(response.json(), {'wasUserOnline': False, 'nearestOnlineTime': None})
+
+    def test_predict_users_online_integration(self):
+        with patch('algo.predict_users') as mock_predict_users:
+            mock_predict_users.return_value = {'OnlineUsers': 0}
+            response = self.client.get("/api/predictions/users?date=2023-10-17")
+            self.assertEqual(response.json(), {'OnlineUsers': 0})
+
+    def test_predict_user_online_integration(self):
+        with patch('algo.predict_user') as mock_predict_user:
+            mock_predict_user.return_value = {'willBeOnline': False, 'onlineChance': '0.00'}
+            response = self.client.get("/api/predictions/user?date=2023-10-17&tolerance=0.1&userId=test123")
+            self.assertEqual(response.json(), {'willBeOnline': False, 'onlineChance': '0.00'})
+
+    def test_total_time_integration(self):
+        with patch('algo.total_time_user') as mock_total_time_user:
+            mock_total_time_user.return_value = {'totalTime': []}
+            response = self.client.get("/api/stats/user/total?userId=test123,test456")
+            self.assertEqual(response.json(), {'totalTime': []})
+
+    def test_total_time_avg_integration(self):
+        with patch('algo.total_time_avg') as mock_total_time_avg:
+            mock_total_time_avg.return_value = {'dailyAverage': [], 'weeklyAverage': []}
+            response = self.client.get("/api/stats/user/total/avg?userId=test123,test456")
+            self.assertEqual(response.json(), {'dailyAverage': [], 'weeklyAverage': []})
+
+    def test_post_report_integration(self):
+        with patch('algo.total_time_user') as mock_total_time_user, patch('algo.total_time_avg') as mock_total_time_avg:
+            mock_total_time_user.return_value = {'totalTime': []}
+            mock_total_time_avg.return_value = {'dailyAverage': [], 'weeklyAverage': []}
+            response = self.client.post("/api/report/?report_name=test_report", json={"users": ["test123", "test456"], "metrics": ["dailyAverage","weeklyAverage"]})
+            self.assertEqual(response.status_code, 200)

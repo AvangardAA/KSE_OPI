@@ -70,4 +70,4 @@ async def forget_gdpr(userId: str):
     if not userId:
         return {"err": "missing id"}
 
-    return await gdpr(userId)
+    return await gdprf(userId)

@@ -97,6 +97,7 @@ async def hist_data(date):
     cc = 0
     users_data = fetch(c)
     q = int(users_data['total'])
+    print(q)
     userbuf = []
     while q > 0:
         for user in users_data['data']:
@@ -108,7 +109,7 @@ async def hist_data(date):
                 if res["status"] == "yes":
                     cc += 1
             except:
-                pass
+                continue
         q -= len(users_data['data'])
         c += len(users_data['data'])
         users_data = fetch(c)
@@ -212,6 +213,7 @@ async def predict_user(date, tolerance, userId):
 async def gdprf(userId):
     global ignorebuf
     ignorebuf.append(userId)
+    return {'msg': "added successfully"}
 
 async def total_time_user(userId):
     global ignorebuf
