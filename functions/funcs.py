@@ -249,6 +249,21 @@ async def total_time_avg(res):
         for i in res['totalTime']:
             if i == 0:
                 return resbuf.append({'err': "cant process"})
+            else:
+                x = random.randint(2, 10)
+                for j in range(x):
+                    randbuf.append(i)
+
+                for i in randbuf:
+                    i += random.randint(100, 10000)
+
+                avgDays = []
+                avgWeek = []
+
+                avgDays.append(sum(randbuf) / len(randbuf))
+                avgWeek.append(avgDays[0] * 7)
+
+                return {"dailyAverage": avgDays, "weeklyAverage": avgWeek}
     else:
         x = random.randint(2, 10)
         for i in res['totalTime']:
