@@ -289,7 +289,8 @@ async def total_time_avg(res):
 async def post_metrics(metrics, prevres, reportname):
     if 'dailyAverage' and 'weeklyAverage' in metrics:
         uid = str(uuid.uuid4())
-        doc = {"uuid": uid, "data": prevres}
+
+        doc = {"uuid": uid, "timestamp": int(datetime.now().timestamp()+10800), "data": prevres}
         output = reportname + ".txt"
         with open(output, 'a') as file:
             json.dump(doc, file)
