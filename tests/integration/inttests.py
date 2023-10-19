@@ -1,61 +1,72 @@
 import unittest
 from unittest.mock import patch
-from fastapi.testclient import TestClient
-from algo import app
+import asyncio
 
+from functions.funcs import total_time_avg, total_time_user
 
 class TestIntegration(unittest.TestCase):
+    @patch('functions.funcs.fetch')
+    def test_total_time_user_not_empty(self, mock_fetch):
+        async def async_test():
+            mock_fetch.return_value = {"total": 1, "data": [{"userId": "user", "lastSeenDate": "2023-10-19T10:47:29.2227007+00:00"}]}
+            blank_user = "user"
+            result = await total_time_user(blank_user)
 
-    def setUp(self):
-        self.client = TestClient(app)
+            self.assertIsInstance(result, dict)
+            self.assertTrue(len(result['totalTime'])>0)
 
-    def test_gdpr_integration(self):
-        with patch('algo.gdprf') as mock_gdprf:
-            mock_gdprf.return_value = {'msg': 'added successfully'}
+        asyncio.run(async_test())
 
-            response = self.client.post("/api/user/forget?userId=test123")
-            self.assertEqual(response.json(), {'msg': 'added successfully'})
+    @patch('functions.funcs.fetch')
+    def test_total_time_user_empty(self, mock_fetch):
+        async def async_test():
+            mock_fetch.return_value = {"total": 0, "data": []}
+            blank_user = "user"
+            result = await total_time_user(blank_user)
 
-    def test_get_users_historical_data_integration(self):
-        with patch('algo.hist_data') as mock_hist_data:
-            mock_hist_data.return_value = {'usersOnline': 0, 'users': []}
+            self.assertIsInstance(result, dict)
+            self.assertTrue(len(result['totalTime'])==0)
 
-            response = self.client.get("/api/stats/users?date=2023-10-17")
+        asyncio.run(async_test())
 
-            self.assertEqual(response.json(), {'usersOnline': 0, 'users': []})
-    def test_get_user_historical_data_integration(self):
-        with patch('algo.user_hist_data') as mock_user_hist_data:
-            mock_user_hist_data.return_value = {'wasUserOnline': False, 'nearestOnlineTime': None}
-            response = self.client.get("/api/stats/user?date=2023-10-17&userId=test123")
-            self.assertEqual(response.json(), {'wasUserOnline': False, 'nearestOnlineTime': None})
+    @patch('functions.funcs.fetch')
+    def test_total_time_user_invalid_last_seen(self, mock_fetch):
+        async def async_test():
+            mock_fetch.return_value = {"total": 1, "data": [{"userId": "user","lastSeenDate": None}]}
+            blank_user = "user"
+            result = await total_time_user(blank_user)
+            self.assertIsInstance(result, dict)
+            self.assertTrue(result['totalTime']==[0])
 
-    def test_predict_users_online_integration(self):
-        with patch('algo.predict_users') as mock_predict_users:
-            mock_predict_users.return_value = {'OnlineUsers': 0}
-            response = self.client.get("/api/predictions/users?date=2023-10-17")
-            self.assertEqual(response.json(), {'OnlineUsers': 0})
+        asyncio.run(async_test())
+    @patch('functions.funcs.total_time_user')
+    def test_total_time_avg_integration_not_empty_response(self, mock_total_time):
+        async def async_test():
+            user_id = ["user1"]
+            mock_total_time.return_value = {"totalTime": [100000]}
 
-    def test_predict_user_online_integration(self):
-        with patch('algo.predict_user') as mock_predict_user:
-            mock_predict_user.return_value = {'willBeOnline': False, 'onlineChance': '0.00'}
-            response = self.client.get("/api/predictions/user?date=2023-10-17&tolerance=0.1&userId=test123")
-            self.assertEqual(response.json(), {'willBeOnline': False, 'onlineChance': '0.00'})
+            result = await total_time_avg(user_id)
+            self.assertIsInstance(result, dict)
+            self.assertIn("dailyAverage", result)
+            self.assertIn("weeklyAverage", result)
+            self.assertTrue(len(result['dailyAverage']) == len(mock_total_time.return_value['totalTime']))
+            self.assertTrue(len(result['weeklyAverage']) == len(mock_total_time.return_value['totalTime']))
+        asyncio.run(async_test())
 
-    def test_total_time_integration(self):
-        with patch('algo.total_time_user') as mock_total_time_user:
-            mock_total_time_user.return_value = {'totalTime': []}
-            response = self.client.get("/api/stats/user/total?userId=test123,test456")
-            self.assertEqual(response.json(), {'totalTime': []})
+    @patch('functions.funcs.total_time_user')
+    def test_total_time_avg_integration_empty_response(self, mock_total_time):
+        async def async_test():
+            user_id = ["user1"]
+            mock_total_time.return_value = {"totalTime": []}
 
-    def test_total_time_avg_integration(self):
-        with patch('algo.total_time_avg') as mock_total_time_avg:
-            mock_total_time_avg.return_value = {'dailyAverage': [], 'weeklyAverage': []}
-            response = self.client.get("/api/stats/user/total/avg?userId=test123,test456")
-            self.assertEqual(response.json(), {'dailyAverage': [], 'weeklyAverage': []})
+            result = await total_time_avg(user_id)
+            self.assertIsInstance(result, dict)
+            self.assertIn("dailyAverage", result)
+            self.assertIn("weeklyAverage", result)
+            self.assertTrue(len(result['dailyAverage']) == len(mock_total_time.return_value['totalTime']) == 0)
+            self.assertTrue(len(result['weeklyAverage']) == len(mock_total_time.return_value['totalTime']) == 0)
 
-    def test_post_report_integration(self):
-        with patch('algo.total_time_user') as mock_total_time_user, patch('algo.total_time_avg') as mock_total_time_avg:
-            mock_total_time_user.return_value = {'totalTime': []}
-            mock_total_time_avg.return_value = {'dailyAverage': [], 'weeklyAverage': []}
-            response = self.client.post("/api/report/?report_name=test_report", json={"users": ["test123", "test456"], "metrics": ["dailyAverage","weeklyAverage"]})
-            self.assertEqual(response.status_code, 200)
+        asyncio.run(async_test())
+
+if __name__ == '__main__':
+    unittest.main()

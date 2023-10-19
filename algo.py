@@ -52,8 +52,7 @@ async def totalTimeAvg(userId):
     if not userId:
         return {"totalTime": None}
 
-    res = await total_time_user(userId)
-    return await total_time_avg(res)
+    return await total_time_avg(userId)
 
 @app.post("/api/report/")
 async def post_report(report_name: str, data: InputData):

@@ -244,7 +244,8 @@ async def total_time_user(userId):
 
     return {"totalTime": lstrandom}
 
-async def total_time_avg(res):
+async def total_time_avg(userId):
+    res = await total_time_user(userId)
     randbuf = []
     resbuf = []
     if len(res['totalTime']) == 1:
