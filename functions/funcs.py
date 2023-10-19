@@ -1,5 +1,7 @@
 import json
+import os
 import random
+from collections import defaultdict
 from datetime import datetime
 import uuid
 
@@ -290,9 +292,111 @@ async def post_metrics(metrics, prevres, reportname):
     if 'dailyAverage' and 'weeklyAverage' in metrics:
         uid = str(uuid.uuid4())
 
-        doc = {"uuid": uid, "timestamp": int(datetime.now().timestamp()+10800), "data": prevres}
-        output = reportname + ".txt"
-        with open(output, 'a') as file:
+        line_count = 0
+
+        with open(reportname + ".txt", 'r') as existing_file:
+            line_count = sum(1 for line in existing_file)
+
+        if line_count == 0:
+            return {"err": "invalid report name"}
+
+        new_timestamp = int(datetime.now().timestamp() + 10800 + line_count * 86400)
+
+        doc = {"uuid": uid, "timestamp": new_timestamp, "data": prevres}
+
+        with open(reportname + ".txt", 'a') as file:
             json.dump(doc, file)
             file.write('\n')
+
         return {}
+
+async def get_reports(reportname, ffrom, to):
+    line_count = 0
+
+    try:
+        tsfrom = int(datetime.fromisoformat(transform_to_iso_format(ffrom)).timestamp()+10800)
+        tsto = int(datetime.fromisoformat(transform_to_iso_format(to)).timestamp()+10800)
+    except:
+        return {"err": "wrong time format"}
+
+    try:
+        with open(reportname + ".txt", 'r') as existing_file:
+            line_count = sum(1 for line in existing_file)
+    except:
+        return {"err": "invalid report name"}
+
+    if line_count == 0:
+        return {"err": "invalid report name"}
+
+    try:
+        with open(reportname + ".txt", 'r') as file:
+            data = [json.loads(line) for line in file if line.strip()]
+    except:
+        return {"err": "load failed"}
+
+    if (tsto-tsfrom) % 86400 != 0:
+        return {"err": "specify interval dividable on 24 hr"}
+
+    reslist = []
+
+    for entry in data:
+        if tsfrom <= entry['timestamp'] <= tsto:
+            user_ids = entry['data']['usersIds']
+            daily_averages = entry['data']['dailyAverage']
+            weekly_averages = entry['data']['weeklyAverage']
+
+            for i, user_id in enumerate(user_ids):
+                user_daily_avg = daily_averages[i]
+                user_weekly_avg = weekly_averages[i]
+
+                reslist.append([user_id, user_daily_avg, user_weekly_avg])
+
+    daily_sum = defaultdict(float)
+    daily_count = defaultdict(int)
+    weekly_sum = defaultdict(float)
+    weekly_count = defaultdict(int)
+
+    user_appearances = defaultdict(int)
+
+    for user_id, daily_avg, weekly_avg in reslist:
+        daily_sum[user_id] += daily_avg
+        daily_count[user_id] += 1
+        weekly_sum[user_id] += weekly_avg
+        weekly_count[user_id] += 1
+        user_appearances[user_id] += 1
+
+    user_averages = {}
+    user_totals = {}
+
+    for user_id in user_appearances:
+        avg_daily = daily_sum[user_id] / daily_count[user_id]
+        avg_weekly = weekly_sum[user_id] / weekly_count[user_id]
+        total_time = avg_daily * user_appearances[user_id]
+
+        user_averages[user_id] = {
+            'averageDailyAverage': avg_daily,
+            'averageWeeklyAverage': avg_weekly
+        }
+        user_totals[user_id] = total_time
+
+    resoutput = []
+
+    for user_id in user_appearances:
+        avg_daily = daily_sum[user_id] / daily_count[user_id]
+        avg_weekly = weekly_sum[user_id] / weekly_count[user_id]
+        total_time = avg_daily * user_appearances[user_id]
+
+        user_metrics = {
+            "userId": user_id,
+            "metrics": [
+                {"dailyAverage": avg_daily},
+                {"weeklyAverage": avg_weekly},
+                {"total": total_time},
+                {"min": min(reslist, key=lambda x: x[1])[1]},
+                {"max": max(reslist, key=lambda x: x[1])[1]}
+            ]
+        }
+
+        resoutput.append(user_metrics)
+
+    return resoutput
