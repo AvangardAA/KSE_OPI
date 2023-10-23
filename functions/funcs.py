@@ -311,6 +311,27 @@ async def post_metrics(metrics, prevres, reportname):
 
         return {}
 
+def calculate_metrics_result(user_appearances, daily_sum, daily_count, weekly_sum, weekly_count, reslist):
+    resoutput = []
+
+    for user_id in user_appearances:
+        avg_daily = daily_sum[user_id] / daily_count[user_id]
+        avg_weekly = weekly_sum[user_id] / weekly_count[user_id]
+        total_time = avg_daily * user_appearances[user_id]
+
+        user_metrics = {
+            "userId": user_id,
+            "metrics": [
+                {"dailyAverage": avg_daily},
+                {"weeklyAverage": avg_weekly},
+                {"total": total_time},
+                {"min": min(reslist, key=lambda x: x[1])[1]},
+                {"max": max(reslist, key=lambda x: x[1])[1]}
+            ]
+        }
+
+        resoutput.append(user_metrics)
+
 async def get_reports(reportname, ffrom, to):
     line_count = 0
 
@@ -380,24 +401,4 @@ async def get_reports(reportname, ffrom, to):
         }
         user_totals[user_id] = total_time
 
-    resoutput = []
-
-    for user_id in user_appearances:
-        avg_daily = daily_sum[user_id] / daily_count[user_id]
-        avg_weekly = weekly_sum[user_id] / weekly_count[user_id]
-        total_time = avg_daily * user_appearances[user_id]
-
-        user_metrics = {
-            "userId": user_id,
-            "metrics": [
-                {"dailyAverage": avg_daily},
-                {"weeklyAverage": avg_weekly},
-                {"total": total_time},
-                {"min": min(reslist, key=lambda x: x[1])[1]},
-                {"max": max(reslist, key=lambda x: x[1])[1]}
-            ]
-        }
-
-        resoutput.append(user_metrics)
-
-    return resoutput
+    return calculate_metrics_result(user_appearances, daily_sum, daily_count, weekly_sum, weekly_count, reslist)
