@@ -31,4 +31,5 @@ jobs:
       run: python tests/e2e/e2e_tests.py
 
     - name: Run integration tests
-      run: python tests/integration/assignment4.py
+      run: python -m tests.integration.assignment4
+
