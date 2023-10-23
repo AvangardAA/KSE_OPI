@@ -217,7 +217,7 @@ async def gdprf(userId):
     ignorebuf.append(userId)
     return {'msg': "added successfully"}
 
-async def total_time_user(userId):
+async def total_time_user(userId): #integration test in inttests
     global ignorebuf
     c = 0
     users_data = fetch(c)
@@ -244,7 +244,7 @@ async def total_time_user(userId):
 
     return {"totalTime": lstrandom}
 
-async def total_time_avg(userId):
+async def total_time_avg(userId): #integration test in inttests
     res = await total_time_user(userId)
     randbuf = []
     resbuf = []
@@ -289,8 +289,11 @@ async def total_time_avg(userId):
 
         return {"dailyAverage": avgDays, "weeklyAverage": avgWeek}
 
-async def post_metrics(metrics, prevres, reportname):
-    if 'dailyAverage' and 'weeklyAverage' in metrics:
+async def post_metrics(userIdstr, data, reportname):
+    res = await total_time_user(userIdstr)
+    prevres = await total_time_avg(res)
+    prevres['usersIds'] = data.users
+    if 'dailyAverage' and 'weeklyAverage' in data.metrics:
         uid = str(uuid.uuid4())
 
         line_count = 0

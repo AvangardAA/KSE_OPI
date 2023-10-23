@@ -59,10 +59,7 @@ async def post_report(report_name: str, data: InputData):
     if data is None:
         return {"err": "empty response"}
     userIdstr = ",".join(data.users)
-    res = await total_time_user(userIdstr)
-    res = await total_time_avg(res)
-    res['usersIds'] = data.users
-    return await post_metrics(data.metrics, res, report_name)
+    return await post_metrics(userIdstr,data,report_name)
 
 @app.get("/api/report/")
 async def get_report(report_name: str, ffrom: str, to: str):

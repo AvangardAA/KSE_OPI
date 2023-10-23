@@ -7,7 +7,7 @@ import httpx
 
 class TestE2E(unittest.TestCase):
     def setUp(self):
-        self.conn = http.client.HTTPConnection("127.0.0.1:8000")  # Update with your server's host and port
+        self.conn = http.client.HTTPConnection("127.0.0.1:8000")
 
     def tearDown(self):
         self.conn.close()
