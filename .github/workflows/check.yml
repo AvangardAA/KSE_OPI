@@ -3,7 +3,7 @@ name: Run Tests on Ubuntu 22.04
 on:
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   build:
