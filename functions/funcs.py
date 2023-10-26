@@ -335,6 +335,22 @@ def calculate_metrics_result(user_appearances, daily_sum, daily_count, weekly_su
 
         resoutput.append(user_metrics)
 
+def make_res_list(data, tsfrom, tsto):
+    reslist = []
+    for entry in data:
+        if tsfrom <= entry['timestamp'] <= tsto:
+            user_ids = entry['data']['usersIds']
+            daily_averages = entry['data']['dailyAverage']
+            weekly_averages = entry['data']['weeklyAverage']
+
+            for i, user_id in enumerate(user_ids):
+                user_daily_avg = daily_averages[i]
+                user_weekly_avg = weekly_averages[i]
+
+                reslist.append([user_id, user_daily_avg, user_weekly_avg])
+
+    return reslist
+
 async def get_reports(reportname, ffrom, to):
     line_count = 0
 
@@ -362,19 +378,7 @@ async def get_reports(reportname, ffrom, to):
     if (tsto-tsfrom) % 86400 != 0:
         return {"err": "specify interval dividable on 24 hr"}
 
-    reslist = []
-
-    for entry in data:
-        if tsfrom <= entry['timestamp'] <= tsto:
-            user_ids = entry['data']['usersIds']
-            daily_averages = entry['data']['dailyAverage']
-            weekly_averages = entry['data']['weeklyAverage']
-
-            for i, user_id in enumerate(user_ids):
-                user_daily_avg = daily_averages[i]
-                user_weekly_avg = weekly_averages[i]
-
-                reslist.append([user_id, user_daily_avg, user_weekly_avg])
+    reslist = make_res_list(data, tsfrom, tsto)
 
     daily_sum = defaultdict(float)
     daily_count = defaultdict(int)
