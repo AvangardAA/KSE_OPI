@@ -1,6 +1,9 @@
 name: Run Tests on Ubuntu 22.04
 
 on:
+  push:
+    branches:
+      - master
   pull_request:
     branches:
       - master
