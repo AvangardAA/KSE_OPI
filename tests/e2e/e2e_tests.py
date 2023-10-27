@@ -99,7 +99,7 @@ class TestE2E(unittest.TestCase):
                 try:
                     parsed_data = json.loads(data)
                     self.assertIsInstance(parsed_data, dict)
-                    self.assertTrue(len(parsed_data) == 2)
+                    self.assertTrue(len(parsed_data['users'])==2)
                 except json.JSONDecodeError:
                     self.fail("Response is not valid JSON")
 
