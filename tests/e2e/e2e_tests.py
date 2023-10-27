@@ -83,26 +83,25 @@ class TestE2E(unittest.TestCase):
                     self.fail("Response is not valid JSON")
 
     async def test_get_reports_V2_200(self):
-            async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "http://127.0.0.1:8000/api/report?report_name=dummy&ffrom=2023-19-10-07:00&to=2023-23-10-07:00&ver=2")
 
-                response = await client.get(
-                    "http://127.0.0.1:8000/api/report?report_name=dummy&ffrom=2023-19-10-07:00&to=2023-23-10-07:00&ver=2")
+            if response.status_code == 307:
+                location = response.headers.get("Location")
+                response = await client.get(location)
 
-                if response.status_code == 307:
-                    location = response.headers.get("Location")
-                    response = await client.get(location)
+            data = response.text
 
-                data = response.text
-
-                if response.status_code != 200:
-                    self.assertEqual(response.status_code, 404)
-                else:
-                    try:
-                        parsed_data = json.loads(data)
-                        self.assertIsInstance(parsed_data, list)
-                        self.assertTrue(len(parsed_data) == 2)
-                    except json.JSONDecodeError:
-                        self.fail("Response is not valid JSON")
+            if response.status_code != 200:
+                self.assertEqual(response.status_code, 404)
+            else:
+                try:
+                    parsed_data = json.loads(data)
+                    self.assertIsInstance(parsed_data, list)
+                    self.assertTrue(len(parsed_data) == 2)
+                except json.JSONDecodeError:
+                    self.fail("Response is not valid JSON")
 
     def test_start_get200_fail(self):
         asyncio.run(self.test_get_reports_307_then_200_then_fail())
