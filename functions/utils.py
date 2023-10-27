@@ -50,18 +50,23 @@ def calculate_metrics_result(user_appearances, daily_sum, daily_count, weekly_su
 
         resoutput.append(user_metrics)
 
+    return resoutput
+
 def make_res_list(data, tsfrom, tsto):
     reslist = []
-    for entry in data:
-        if tsfrom <= entry['timestamp'] <= tsto:
-            user_ids = entry['data']['usersIds']
-            daily_averages = entry['data']['dailyAverage']
-            weekly_averages = entry['data']['weeklyAverage']
+    try:
+        for entry in data:
+            if tsfrom <= entry['timestamp'] <= tsto:
+                user_ids = entry['data']['usersIds']
+                daily_averages = entry['data']['dailyAverage']
+                weekly_averages = entry['data']['weeklyAverage']
 
-            for i, user_id in enumerate(user_ids):
-                user_daily_avg = daily_averages[i]
-                user_weekly_avg = weekly_averages[i]
+                for i, user_id in enumerate(user_ids):
+                    user_daily_avg = daily_averages[i]
+                    user_weekly_avg = weekly_averages[i]
 
-                reslist.append([user_id, user_daily_avg, user_weekly_avg])
+                    reslist.append([user_id, user_daily_avg, user_weekly_avg])
+    except:
+        return {"err": "broken make"}
 
     return reslist

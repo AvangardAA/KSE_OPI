@@ -351,12 +351,15 @@ async def get_reports(reportname, ffrom, to):
 
     user_appearances = defaultdict(int)
 
-    for user_id, daily_avg, weekly_avg in reslist:
-        daily_sum[user_id] += daily_avg
-        daily_count[user_id] += 1
-        weekly_sum[user_id] += weekly_avg
-        weekly_count[user_id] += 1
-        user_appearances[user_id] += 1
+    try:
+        for user_id, daily_avg, weekly_avg in reslist:
+            daily_sum[user_id] += daily_avg
+            daily_count[user_id] += 1
+            weekly_sum[user_id] += weekly_avg
+            weekly_count[user_id] += 1
+            user_appearances[user_id] += 1
+    except:
+        return {"err": "broken reslist"}
 
     user_averages = {}
     user_totals = {}
