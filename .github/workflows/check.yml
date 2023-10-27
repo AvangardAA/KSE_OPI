@@ -33,6 +33,12 @@ jobs:
     - name: Run end-to-end tests
       run: python tests/e2e/e2e_tests.py
 
-    - name: Run integration tests
+    - name: Run integration tests 4
       run: python -m tests.integration.assignment4
+
+    - name: Run integration tests 5
+      run: python -m tests.integration.assignment5
+
+    - name: Run integration tests 7
+      run: python -m tests.integration.assignment7
 

@@ -70,3 +70,29 @@ def make_res_list(data, tsfrom, tsto):
         return {"err": "broken make"}
 
     return reslist
+
+def transform_metrics_list(input_list):
+    transformed_list = []
+
+    for item in input_list:
+        user_id = item["userId"]
+        metrics = item["metrics"]
+        daily_average = None
+
+        for metric in metrics:
+            if "dailyAverage" in metric:
+                daily_average = metric["dailyAverage"]
+                break
+
+        if daily_average is not None:
+            user_entry = {
+                "userId": user_id,
+                "metrics": [
+                    {
+                        "dailyAverage": daily_average
+                    }
+                ]
+            }
+            transformed_list.append(user_entry)
+
+    return {"users": transformed_list}

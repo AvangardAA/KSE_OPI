@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from functions.funcs import hist_data, user_hist_data, predict_users, predict_user, total_time_user, total_time_avg, \
     gdprf, post_metrics, get_reports
+from functions.utils import transform_metrics_list
 from models import InputData
 
 app = FastAPI()
@@ -62,12 +63,16 @@ async def post_report(report_name: str, data: InputData):
     return await post_metrics(userIdstr,data,report_name)
 
 @app.get("/api/report/")
-async def get_report(report_name: str, ffrom: str, to: str):
+async def get_report(report_name: str, ffrom: str, to: str, ver: int): #version 1-old, 2-global
     if report_name is None or ffrom is None or to is None:
         return {"err": "not enough data"}
 
-    return await get_reports(report_name, ffrom, to)
+    if ver == 1:
+        return await get_reports(report_name, ffrom, to)
 
+    elif ver == 2:
+        res = await get_reports(report_name, ffrom, to)
+        return transform_metrics_list(res)
 
 @app.post('/api/user/forget')
 async def forget_gdpr(userId: str):
