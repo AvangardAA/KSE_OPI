@@ -64,7 +64,7 @@ class TestE2E(unittest.TestCase):
         async with httpx.AsyncClient() as client:
 
             response = await client.get(
-                "http://127.0.0.1:8000/api/report?report_name=dummy1&ffrom=2023-19-10-07:00&to=2023-23-10-07:00&ver=1")
+                "http://127.0.0.1:8000/api/report?report_name=dummy&ffrom=2023-19-10-07:00&to=2023-23-10-07:00&ver=1")
 
             if response.status_code == 307:
                 location = response.headers.get("Location")
@@ -77,8 +77,8 @@ class TestE2E(unittest.TestCase):
             else:
                 try:
                     parsed_data = json.loads(data)
-                    self.assertIsInstance(parsed_data, dict)
-                    self.assertTrue(len(parsed_data)==1)
+                    self.assertIsInstance(parsed_data, list)
+                    self.assertTrue(len(parsed_data)==2)
                 except json.JSONDecodeError:
                     self.fail("Response is not valid JSON")
 
