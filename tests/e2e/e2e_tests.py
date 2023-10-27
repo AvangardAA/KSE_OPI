@@ -83,7 +83,6 @@ class TestE2E(unittest.TestCase):
                     self.fail("Response is not valid JSON")
 
     async def test_get_reports_V2_200(self):
-        async with httpx.AsyncClient() as client:
             async with httpx.AsyncClient() as client:
 
                 response = await client.get(
