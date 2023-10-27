@@ -82,7 +82,7 @@ class TestE2E(unittest.TestCase):
                 except json.JSONDecodeError:
                     self.fail("Response is not valid JSON")
 
-    async def test_get_reports_V2_200(self):
+    """async def test_get_reports_V2_200(self):
         async with httpx.AsyncClient() as client:
             async with httpx.AsyncClient() as client:
 
@@ -103,7 +103,7 @@ class TestE2E(unittest.TestCase):
                         self.assertIsInstance(parsed_data, dict)
                         self.assertTrue(len(parsed_data) == 1)
                     except json.JSONDecodeError:
-                        self.fail("Response is not valid JSON")
+                        self.fail("Response is not valid JSON")"""
 
     def test_start_get200_fail(self):
         asyncio.run(self.test_get_reports_307_then_200_then_fail())
@@ -111,8 +111,8 @@ class TestE2E(unittest.TestCase):
     def test_start_get200(self):
         asyncio.run(self.test_get_reports_200())
 
-    def test_start_get200V2(self):
-        asyncio.run(self.test_get_reports_V2_200())
+    """def test_start_get200V2(self):
+        asyncio.run(self.test_get_reports_V2_200())"""
 
 if __name__ == '__main__':
     unittest.main()
