@@ -53,11 +53,22 @@ def postcheck():
     url = "http://127.0.0.1:8000/api/report?report_name=dummy"
     data = {
         "metrics": ["dailyAverage", "weeklyAverage"],
-        "users": ["e13412b2-fe46-7149-6593-e47043f39c91", "908dcb71-beeb-57c4-72f6-50451a6c3d12"]
+        "users": ["8b0b5db6-19d6-d777-575e-915c2a77959a", "e9de6dd1-84e5-9833-59de-8c51008de6a0"]
     }
 
     response = requests.post(url, json=data)
     print(response.text)
 
+def from_to_collector():
+    while True:
+        url = "http://127.0.0.1:8000/api/report?report_name=dummy"
+        data = {
+            "metrics": ["dailyAverage", "weeklyAverage"],
+            "users": ["e13412b2-fe46-7149-6593-e47043f39c91", "e9de6dd1-84e5-9833-59de-8c51008de6a0"],
+        }
+        requests.post(url, json=data)
+
+        time.sleep(30)
+
 if __name__ == "__main__":
-    postcheck()
+    from_to_collector()

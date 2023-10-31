@@ -1,0 +1,56 @@
+name: Run Tests on Ubuntu 22.04
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11.6"
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Set PYTHONPATH
+      run: export PYTHONPATH="${PYTHONPATH}:${{ github.workspace }}/functions/funcs"
+
+    - name: Start Uvicorn server
+      run: uvicorn algo:app &
+
+    - name: Run end-to-end tests
+      run: python tests/e2e/e2e_tests.py
+
+    - name: Run integration tests 4
+      run: python -m tests.integration.assignment4
+
+    - name: Run integration tests 5
+      run: python -m tests.integration.assignment5
+
+    - name: Run integration tests 7
+      run: python -m tests.integration.assignment7
+
+    - name: Deploy to AWS EC2
+      run: |
+        echo "${{ secrets.AWS_KEY }}" > aws.pem
+        chmod 600 aws.pem
+        ssh -i aws.pem ec2-54-95-103-147.ap-northeast-1.compute.amazonaws.com << EOF
+        cd server
+        git pull origin master
+        cd KSE_OPI
+        screen -r 9500.pts-0.ip-172-31-39-83 -X stuff "^C"
+        python3 -m uvicorn algo:app --host 0.0.0.0 --port 8081
+        EOF
+      shell: bash

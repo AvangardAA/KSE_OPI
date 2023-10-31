@@ -28,3 +28,71 @@ def check_dates_correspond(date1, date2):
             return False
     except ValueError:
         return "format error"
+
+def calculate_metrics_result(user_appearances, daily_sum, daily_count, weekly_sum, weekly_count, reslist):
+    resoutput = []
+
+    for user_id in user_appearances:
+        avg_daily = daily_sum[user_id] / daily_count[user_id]
+        avg_weekly = weekly_sum[user_id] / weekly_count[user_id]
+        total_time = avg_daily * user_appearances[user_id]
+
+        user_metrics = {
+            "userId": user_id,
+            "metrics": [
+                {"dailyAverage": avg_daily},
+                {"weeklyAverage": avg_weekly},
+                {"total": total_time},
+                {"min": min(reslist, key=lambda x: x[1])[1]},
+                {"max": max(reslist, key=lambda x: x[1])[1]}
+            ]
+        }
+
+        resoutput.append(user_metrics)
+
+    return resoutput
+
+def make_res_list(data, tsfrom, tsto):
+    reslist = []
+    try:
+        for entry in data:
+            if tsfrom <= entry['timestamp'] <= tsto:
+                user_ids = entry['data']['usersIds']
+                daily_averages = entry['data']['dailyAverage']
+                weekly_averages = entry['data']['weeklyAverage']
+
+                for i, user_id in enumerate(user_ids):
+                    user_daily_avg = daily_averages[i]
+                    user_weekly_avg = weekly_averages[i]
+
+                    reslist.append([user_id, user_daily_avg, user_weekly_avg])
+    except:
+        return {"err": "broken make"}
+
+    return reslist
+
+def transform_metrics_list(input_list):
+    transformed_list = []
+
+    for item in input_list:
+        user_id = item["userId"]
+        metrics = item["metrics"]
+        daily_average = None
+
+        for metric in metrics:
+            if "dailyAverage" in metric:
+                daily_average = metric["dailyAverage"]
+                break
+
+        if daily_average is not None:
+            user_entry = {
+                "userId": user_id,
+                "metrics": [
+                    {
+                        "dailyAverage": daily_average
+                    }
+                ]
+            }
+            transformed_list.append(user_entry)
+
+    return {"users": transformed_list}
