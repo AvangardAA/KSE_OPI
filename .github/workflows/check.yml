@@ -43,7 +43,7 @@ jobs:
   deploy:
     needs: run-tests
     runs-on: ubuntu-22.04
-    if: github.ref == 'refs/heads/master' && success('run-tests')
+    if: github.ref == 'refs/heads/master' && success()
 
     steps:
     - name: Checkout code
