@@ -45,8 +45,8 @@ jobs:
     - name: Deploy to AWS EC2
       run: |
         echo "${{ secrets.AWS_KEY }}" > aws.pem
-        chmod 600 aws.pem
-        ssh -i aws.pem -o StrictHostKeyChecking=no ubuntu@ec2-54-95-103-147.ap-northeast-1.compute.amazonaws.com << EOF
+        chmod 400 aws.pem
+        ssh -i aws.pem -o StrictHostKeyChecking=no ubuntu@ec2-13-231-170-162.ap-northeast-1.compute.amazonaws.com << EOF
         cd server
         git pull origin master
         cd KSE_OPI
