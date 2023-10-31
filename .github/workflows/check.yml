@@ -51,7 +51,6 @@ jobs:
         ssh -i aws.pem -o StrictHostKeyChecking=no ubuntu@$IP_ADDRESS << EOF
         cd server
         git pull origin master
-        cd KSE_OPI
         screen -r $SCREENADDR -X stuff "^C"
         python3 -m uvicorn algo:app --host 0.0.0.0 --port 8081
         EOF
