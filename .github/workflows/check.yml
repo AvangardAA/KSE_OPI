@@ -25,6 +25,12 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
+    - name: Set PYTHONPATH
+      run: export PYTHONPATH="${PYTHONPATH}:${{ github.workspace }}/functions/funcs"
+
+    - name: Start Uvicorn server
+      run: uvicorn algo:app &
+
     - name: Run Tests
       run: |
         # Run your test command here
@@ -32,7 +38,7 @@ jobs:
         python -m tests.integration.assignment4
         python -m tests.integration.assignment5
         python -m tests.integration.assignment7
-      continue-on-error: true # Continue running subsequent steps even if tests fail
+      continue-on-error: true 
 
   deploy:
     needs: run-tests
@@ -42,20 +48,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.11.6"
-
-    - name: Install dependencies
-      run: pip install -r requirements.txt
-
-    - name: Set PYTHONPATH
-      run: export PYTHONPATH="${PYTHONPATH}:${{ github.workspace }}/functions/funcs"
-
-    - name: Start Uvicorn server
-      run: uvicorn algo:app &
 
     - name: Deploy to AWS EC2
       run: |
