@@ -44,13 +44,15 @@ jobs:
 
     - name: Deploy to AWS EC2
       run: |
+        IP_ADDRESS="${{ secrets.EC2_INSTANCE_IP }}"
+        SCREENADDR="${{ secrets.SCREENADDR }}"
         echo "${{ secrets.AWS_KEY }}" > aws.pem
         chmod 400 aws.pem
-        ssh -i aws.pem -o StrictHostKeyChecking=no ubuntu@ec2-13-231-170-162.ap-northeast-1.compute.amazonaws.com << EOF
+        ssh -i aws.pem -o StrictHostKeyChecking=no ubuntu@$IP_ADDRESS << EOF
         cd server
         git pull origin master
         cd KSE_OPI
-        screen -r 9500.pts-0.ip-172-31-39-83 -X stuff "^C"
+        screen -r $SCREENADDR -X stuff "^C"
         python3 -m uvicorn algo:app --host 0.0.0.0 --port 8081
         EOF
       env:
