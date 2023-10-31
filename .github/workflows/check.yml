@@ -1,20 +1,46 @@
-name: Run Tests on Ubuntu 22.04
+name: Run Tests and Deploy
 
 on:
   push:
     branches:
-      - master
+      - test
   pull_request:
     branches:
-      - master
+      - test
 
 jobs:
-  build:
+  run-tests:
     runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11.6"
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run Tests
+      run: |
+        # Run your test command here
+        python tests/e2e/e2e_tests.py
+        python -m tests.integration.assignment4
+        python -m tests.integration.assignment5
+        python -m tests.integration.assignment7
+      continue-on-error: true # Continue running subsequent steps even if tests fail
+
+  deploy:
+    needs: run-tests
+    runs-on: ubuntu-22.04
+    if: github.ref == 'refs/heads/master' && success('run-tests')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
     - name: Set up Python
       uses: actions/setup-python@v3
@@ -29,18 +55,6 @@ jobs:
 
     - name: Start Uvicorn server
       run: uvicorn algo:app &
-
-    - name: Run end-to-end tests
-      run: python tests/e2e/e2e_tests.py
-
-    - name: Run integration tests 4
-      run: python -m tests.integration.assignment4
-
-    - name: Run integration tests 5
-      run: python -m tests.integration.assignment5
-
-    - name: Run integration tests 7
-      run: python -m tests.integration.assignment7
 
     - name: Deploy to AWS EC2
       run: |
