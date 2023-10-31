@@ -79,6 +79,7 @@ async def get_report(report_name: str, ffrom: str, to: str, ver: int): #version 
         x = transform_metrics_list(res)
         ""
         return {"name": "dummy", "data": x}
+        ""
 
 @app.post('/api/user/forget')
 async def forget_gdpr(userId: str):
