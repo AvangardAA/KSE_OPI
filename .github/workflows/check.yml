@@ -46,7 +46,7 @@ jobs:
       run: |
         echo "${{ secrets.AWS_KEY }}" > aws.pem
         chmod 600 aws.pem
-        ssh -i aws.pem ec2-54-95-103-147.ap-northeast-1.compute.amazonaws.com << EOF
+        ssh -i aws.pem ubuntu@ec2-54-95-103-147.ap-northeast-1.compute.amazonaws.com << EOF
         cd server
         git pull origin master
         cd KSE_OPI
