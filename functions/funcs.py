@@ -376,3 +376,4 @@ async def get_reports(reportname, ffrom, to):
         user_totals[user_id] = total_time
 
     return calculate_metrics_result(user_appearances, daily_sum, daily_count, weekly_sum, weekly_count, reslist)
+""
