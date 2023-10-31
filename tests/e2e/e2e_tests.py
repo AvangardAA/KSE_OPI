@@ -20,7 +20,7 @@ class TestE2E(unittest.TestCase):
         self.assertEqual(response.status, 200)
         self.assertEqual(json.loads(data), {"totalTime": []})
 
-        self.conn.request("GET", "/api/stats/user/total?userId=2fba2529-c166-8574-2da2-eac544d82634")
+        self.conn.request("GET", "/api/stats/user/total?userId=e13412b2-fe46-7149-6593-e47043f39c91")
         response = self.conn.getresponse()
         data = response.read().decode()
         self.assertEqual(response.status, 200)
@@ -33,7 +33,7 @@ class TestE2E(unittest.TestCase):
         self.assertEqual(response.status, 200)
         self.assertEqual(json.loads(data), {"dailyAverage": [], 'weeklyAverage': []})
 
-        self.conn.request("GET", "/api/stats/user/total/avg?userId=2fba2529-c166-8574-2da2-eac544d82634")
+        self.conn.request("GET", "/api/stats/user/total/avg?userId=e13412b2-fe46-7149-6593-e47043f39c91")
         response = self.conn.getresponse()
         data = response.read().decode()
         self.assertEqual(response.status, 200)
