@@ -77,6 +77,7 @@ async def get_report(report_name: str, ffrom: str, to: str, ver: int): #version 
     elif ver == 3:
         res = await get_reports(report_name, ffrom, to)
         x = transform_metrics_list(res)
+        ""
         return {"name": "dummy", "data": x}
 
 @app.post('/api/user/forget')
