@@ -52,7 +52,7 @@ jobs:
         cd server
         git pull origin master
         screen -r $SCREENADDR -X stuff "^C"
-        python3 -m uvicorn algo:app --host 0.0.0.0 --port 8081
+        python3 -m uvicorn algo:app --host 0.0.0.0 --port 8081 &
         EOF
       env:
         SSH_PRIVATE_KEY: ${{ secrets.AWS_KEY }}
