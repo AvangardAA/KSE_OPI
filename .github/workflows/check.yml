@@ -39,7 +39,14 @@ jobs:
         python -m tests.integration.assignment5
         python -m tests.integration.assignment7
         python -m tests.integration.exam
-      continue-on-error: true 
+      continue-on-error: true
+
+    - name: Merge
+      run: |
+          git fetch origin
+          git checkout main
+          git merge --no-ff test_exam -m "Merge test_exam into main"
+          git push
 
   deploy:
     needs: run-tests
