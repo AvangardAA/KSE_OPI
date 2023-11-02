@@ -380,6 +380,8 @@ async def get_reports(reportname, ffrom, to):
 async def helper_function_exam():
     c = 0
     users_data = fetch(c)
+    if users_data == []:
+        return {"msg":"error"}
     q = int(users_data['total'])
 
     file_path = os.path.join(os.getcwd(), "log_exam.txt")
@@ -400,8 +402,12 @@ async def helper_function_exam():
         c += len(users_data['data'])
         users_data = fetch(c)
 
+    return "success"
+
 async def get_uuser_list_exam():
-    await helper_function_exam()
+    res = await helper_function_exam()
+    if res != "success":
+        return {"err": "some error"}
     with open('log_exam.txt', 'r') as file:
         file_contents = file.read()
 
