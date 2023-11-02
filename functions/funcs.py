@@ -377,4 +377,43 @@ async def get_reports(reportname, ffrom, to):
 
     return calculate_metrics_result(user_appearances, daily_sum, daily_count, weekly_sum, weekly_count, reslist)
 
+async def helper_function_exam():
+    c = 0
+    users_data = fetch(c)
+    if users_data == []:
+        return {"msg":"error"}
+    q = int(users_data['total'])
+
+    file_path = os.path.join(os.getcwd(), "log_exam.txt")
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        return
+
+    while q > 0:
+        for user in users_data['data']:
+            if user["lastSeenDate"] is None:
+                continue
+            else:
+                ts = int(datetime.fromisoformat(user["lastSeenDate"]).timestamp())
+                doc = {"username": user['nickname'], "userId": user["userId"], "firstSeen": transform_from_iso_format(ts)}
+                with open("log_exam.txt", 'a') as file:
+                    json.dump(doc, file)
+                    file.write('\n')
+        q -= len(users_data['data'])
+        c += len(users_data['data'])
+        users_data = fetch(c)
+
+    return "success"
+
+async def get_uuser_list_exam():
+    res = await helper_function_exam()
+    if res != "success":
+        return {"err": "some error"}
+    with open('log_exam.txt', 'r') as file:
+        file_contents = file.read()
+
+    json_dicts = file_contents.splitlines()
+    parsed_dicts = [json.loads(json_str) for json_str in json_dicts]
+
+    return parsed_dicts
+
 ""

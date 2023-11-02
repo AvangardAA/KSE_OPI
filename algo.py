@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from functions.funcs import hist_data, user_hist_data, predict_users, predict_user, total_time_user, total_time_avg, \
-    gdprf, post_metrics, get_reports
+    gdprf, post_metrics, get_reports, get_uuser_list_exam
 from functions.utils import transform_metrics_list
 from models import InputData
 
@@ -87,3 +87,7 @@ async def forget_gdpr(userId: str):
         return {"err": "missing id"}
 
     return await gdprf(userId)
+
+@app.get('/api/users/list')
+async def get_user_list_exam():
+    return await get_uuser_list_exam()
