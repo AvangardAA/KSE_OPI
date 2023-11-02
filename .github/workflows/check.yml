@@ -6,7 +6,7 @@ on:
       - test
   pull_request:
     branches:
-      - test
+      - test_exam
       - master
 
 jobs:
@@ -38,6 +38,7 @@ jobs:
         python -m tests.integration.assignment4
         python -m tests.integration.assignment5
         python -m tests.integration.assignment7
+        python -m tests.integration.exam
       continue-on-error: true 
 
   deploy:
