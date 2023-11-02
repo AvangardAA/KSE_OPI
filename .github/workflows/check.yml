@@ -44,7 +44,7 @@ jobs:
     - name: Merge
       run: |
           git fetch origin
-          git checkout main
+          git checkout master
           git merge --no-ff test_exam -m "Merge test_exam into main"
           git push
 
